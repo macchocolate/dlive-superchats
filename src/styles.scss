@@ -18,6 +18,22 @@
   flex-direction: column;
 }
 
+.clear-superchats {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+
+  button {
+    background-color: salmon;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    font-weight: bold;
+  }
+}
+
 * {
   box-sizing: border-box;
 }

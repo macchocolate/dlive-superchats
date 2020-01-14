@@ -99,7 +99,7 @@ async function openWs(regName: string, onGift: Function) {
 
 function App() {
   const [streamer, setStreamer] = useState(
-    () => window.location.hash.slice(1) || 'shalit'
+    () => window.location.hash.slice(1) || 'demo'
   )
   function storageLocation() {
     return `${streamer}-gifts`
@@ -135,10 +135,12 @@ function App() {
   }
 
   useEffect(() => {
+    if (streamer === 'demo') return
     localStorage.setItem(storageLocation(), JSON.stringify(gifts))
   }, [gifts])
   useEffect(() => {
-    if (debug.enabled) {
+    window.onhashchange = function () {window.location.reload()}
+    if (debug.enabled || streamer === 'demo') {
       setInterval(() => {
         onGift(generateMockGift())
       }, 500)
@@ -184,6 +186,12 @@ function App() {
           }}
           value={amountFilter}
         />
+      </div>
+      <div className="clear-superchats">
+          <button onClick={()=>{
+            window.localStorage.clear()
+            window.location.reload()
+          }}>clear all superchats</button>
       </div>
     </div>
   )
