@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react"
-import { render } from "react-dom"
-import { getWithCors } from "./util"
-import "./styles"
-import day from "dayjs"
+import React, { useState, useEffect } from 'react'
+import { render } from 'react-dom'
+import { getWithCors } from './util'
+import './styles'
+import day from 'dayjs'
 import Debug from 'debug'
 
 const debug = Debug('dchats')
@@ -11,13 +11,13 @@ function parseInitialState(data) {
   const match = /partnerStatus.*?username":"(.*?)"/.exec(data)
   debug({ match })
   if (!match) {
-    throw new Error("failed to parse streamername from request")
+    throw new Error('failed to parse streamername from request')
   }
 
   return match[1]
 }
 
-const WS_PROXY = "ws://ws-pass.herokuapp.com/"
+const WS_PROXY = 'ws://ws-pass.herokuapp.com/'
 // const WS_PROXY = 'ws://localhost:9000/'
 
 async function getStreamerName(regName: string) {
@@ -29,12 +29,12 @@ async function openWs(regName: string, onGift: Function) {
   const streamername = await getStreamerName(regName)
   const ws = new WebSocket(
     `${WS_PROXY}wss://graphigostream.prd.dlive.tv?origin=https://dlive.tv&host=graphigostream.prd.dlive.tv`,
-    "graphql-ws"
+    'graphql-ws'
   )
   ws.onmessage = (mes) => {
     if (!mes || !mes.data) return
     const data = JSON.parse(mes.data)
-    if (data.type === "ka" || data.type === "connection_ack") {
+    if (data.type === 'ka' || data.type === 'connection_ack') {
       return
     }
     onGift(data)
@@ -44,19 +44,19 @@ async function openWs(regName: string, onGift: Function) {
   ws.onopen = function() {
     ws.send(
       JSON.stringify({
-        type: "connection_init",
+        type: 'connection_init',
         payload: {}
       })
     )
 
     ws.send(
       JSON.stringify({
-        id: "1",
-        type: "start",
+        id: '1',
+        type: 'start',
         payload: {
           variables: { streamer: streamername },
 
-          operationName: "StreamMessageSubscription",
+          operationName: 'StreamMessageSubscription',
           query: `subscription StreamMessageSubscription($streamer: String!) {
          streamMessageReceived(streamer: $streamer) {
          type
@@ -99,7 +99,7 @@ async function openWs(regName: string, onGift: Function) {
 
 function App() {
   const [streamer, setStreamer] = useState(
-    () => window.location.hash.slice(1) || "shalit"
+    () => window.location.hash.slice(1) || 'shalit'
   )
   function storageLocation() {
     return `${streamer}-gifts`
@@ -112,12 +112,12 @@ function App() {
 
   function onGift(data) {
     const giftData = data.payload.data.streamMessageReceived[0]
-    debug("got gift:", giftData)
-    if (giftData.type !== "Gift") {
+    debug('got gift:', giftData)
+    if (giftData.type !== 'Gift') {
       return
     }
 
-    if (giftData.gift === "LEMON" || giftData.gift === "ICE_CREAM") {
+    if (giftData.gift === 'LEMON' || giftData.gift === 'ICE_CREAM') {
       return
     }
     const amount = getGiftPrice(giftData.gift, giftData.amount)
@@ -160,7 +160,7 @@ function App() {
                   <strong>${v.amount}</strong>
                 </span>
                 <span className="datetime">
-                  {day(+v.createdAt.slice(0, -6)).format("hh:mma")}
+                  {day(+v.createdAt.slice(0, -6)).format('hh:mma')}
                 </span>
               </div>
               <span className="message">{v.message}</span>
@@ -189,11 +189,11 @@ function App() {
   )
 }
 
-render(<App />, document.getElementById("app"))
+render(<App />, document.getElementById('app'))
 
 const mockMessages = [
   `Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.`,
-  "this is some stupid message"
+  'this is some stupid message'
 ]
 
 const lemonPrice = 0.015
@@ -218,12 +218,12 @@ const generateMockGift = () => {
     Math.random() * 100000
   ).toFixed(0)
   const mockUsernames = [
-    "Spongebob",
-    "Patrick",
-    "Sandy Cheeks",
-    "Eugiune Krabs",
-    "Plankton",
-    "Squidward"
+    'Spongebob',
+    'Patrick',
+    'Sandy Cheeks',
+    'Eugiune Krabs',
+    'Plankton',
+    'Squidward'
   ]
   newGift.payload.data.streamMessageReceived[0].sender.displayname = getRandomOf(
     mockUsernames
@@ -232,7 +232,7 @@ const generateMockGift = () => {
   newGift.payload.data.streamMessageReceived[0].gift = getRandomOf(giftTypes)
   newGift.payload.data.streamMessageReceived[0].amount = getRandomOf(
     Array(5)
-      .fill("")
+      .fill('')
       .map((x, i) => i + 1)
   )
 
@@ -247,32 +247,32 @@ const ex2payload = {
     data: {
       streamMessageReceived: [
         {
-          __typename: "ChatGift",
-          type: "Gift",
-          id: "48048c51-2f05-4124-810e-6e1765104244",
+          __typename: 'ChatGift',
+          type: 'Gift',
+          id: '48048c51-2f05-4124-810e-6e1765104244',
           sender: {
-            __typename: "StreamchatUser",
-            id: "streamchatuser:krozmode",
-            username: "krozmode",
-            displayname: "ZORK_MODE",
-            avatar: "https://image.dlivecdn.com/avatar/default21.png",
-            partnerStatus: "NONE",
+            __typename: 'StreamchatUser',
+            id: 'streamchatuser:krozmode',
+            username: 'krozmode',
+            displayname: 'ZORK_MODE',
+            avatar: 'https://image.dlivecdn.com/avatar/default21.png',
+            partnerStatus: 'NONE',
             badges: [],
             effect: null
           },
-          role: "None",
-          roomRole: "Member",
+          role: 'None',
+          roomRole: 'Member',
           subscribing: false,
-          createdAt: "1578979154208476310",
-          gift: "LEMON",
-          amount: "1",
+          createdAt: '1578979154208476310',
+          gift: 'LEMON',
+          amount: '1',
           recentCount: 1,
           expireDuration: 0,
-          message: ""
+          message: ''
         }
       ]
     }
   },
-  id: "10",
-  type: "data"
+  id: '10',
+  type: 'data'
 }

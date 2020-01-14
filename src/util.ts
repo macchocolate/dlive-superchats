@@ -5,11 +5,9 @@ const CORS_PROXY2 = 'https://safe-fortress-20275.herokuapp.com/'
 
 const debug = console.log
 
-export async function getWithCors (url: string) {
+export async function getWithCors(url: string) {
   const getRes = (tryNum = 0) => {
-    return axios.get(
-      `${tryNum === 0 ? CORS_PROXY : CORS_PROXY2}${url}`,
-    )
+    return axios.get(`${tryNum === 0 ? CORS_PROXY : CORS_PROXY2}${url}`)
   }
 
   let ret
@@ -36,7 +34,7 @@ export async function getWithCors (url: string) {
   return ret.data
 }
 
-function getAppError (mes: string) {
+function getAppError(mes: string) {
   const e = new Error(mes)
 
   e.name = 'AppError'

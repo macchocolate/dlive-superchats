@@ -9,7 +9,7 @@
 }
 
 #app {
-  width: 100%
+  width: 100%;
 }
 
 .superchat {
@@ -17,7 +17,6 @@
   display: flex;
   flex-direction: column;
 }
-
 
 * {
   box-sizing: border-box;
@@ -33,7 +32,7 @@
   font-size: 14px;
   position: fixed;
   // font-weight: bold;
-  top:10px;
+  top: 10px;
   left: 10px;
 
   input {

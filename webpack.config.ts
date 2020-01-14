@@ -1,11 +1,11 @@
-import webpack = require("webpack")
-import HtmlWebpackPlugin = require("html-webpack-plugin")
+import webpack = require('webpack')
+import HtmlWebpackPlugin = require('html-webpack-plugin')
 
 const config: webpack.Configuration = {
-  mode: "development",
-  entry: "./src",
+  mode: 'development',
+  entry: './src',
 
-  plugins: [new HtmlWebpackPlugin({ template: "./src/index.html" })],
+  plugins: [new HtmlWebpackPlugin({ template: './src/index.html' })],
 
   module: {
     rules: [
@@ -13,22 +13,22 @@ const config: webpack.Configuration = {
         test: /\.(tsx|jsx|ts|js)$/,
         exclude: /node_modules/,
         use: {
-          loader: "babel-loader",
+          loader: 'babel-loader',
           options: {
             plugins: [
               [
-                "babel-plugin-styled-components",
+                'babel-plugin-styled-components',
                 {
                   ssr: false
                 }
               ],
-              "@babel/plugin-proposal-class-properties"
+              '@babel/plugin-proposal-class-properties'
             ],
             presets: [
-              "@babel/preset-typescript",
-              "@babel/preset-react",
+              '@babel/preset-typescript',
+              '@babel/preset-react',
               [
-                "@babel/preset-env",
+                '@babel/preset-env',
                 {
                   targets: {
                     chrome: 80
@@ -41,33 +41,33 @@ const config: webpack.Configuration = {
       },
       {
         test: /\.(vert|frag)$/,
-        use: "raw-loader"
+        use: 'raw-loader'
       },
       {
         test: /\.(png)$/,
-        use: "url-loader"
+        use: 'url-loader'
       },
       {
         test: /\.s[ac]ss$/i,
         use: [
           // Creates `style` nodes from JS strings
-          "style-loader",
+          'style-loader',
           // Translates CSS into CommonJS
-          "css-loader",
+          'css-loader',
           // Compiles Sass to CSS
-          "sass-loader"
+          'sass-loader'
         ]
       }
     ]
   },
 
   resolve: {
-    extensions: [".js", ".tsx", ".ts", ".jsx", "*", ".scss"]
+    extensions: ['.js', '.tsx', '.ts', '.jsx', '*', '.scss']
   },
 
   devServer: {
     // open: true,
-    host: "0.0.0.0",
+    host: '0.0.0.0',
     port: 4141
   }
 }
