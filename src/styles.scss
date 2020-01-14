@@ -1,0 +1,68 @@
+.superchat-container {
+  margin: 0 20px;
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  align-content: flex-end;
+  justify-content: end;
+  padding: 10px 0;
+}
+
+#app {
+  width: 100%
+}
+
+.superchat {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+
+* {
+  box-sizing: border-box;
+}
+
+.message {
+  font-size: 14px;
+  margin-left: 14px;
+}
+
+.amount-filter {
+  background: #f9f9f9;
+  font-size: 14px;
+  position: fixed;
+  // font-weight: bold;
+  top:10px;
+  left: 10px;
+
+  input {
+    width: 60px;
+    border-radius: 4px;
+    border: none;
+    padding: 6px 2px;
+    outline: none;
+  }
+}
+
+.datetime {
+  font-size: 12px;
+}
+
+.money {
+  font-size: 12px;
+  background-color: rgb(31, 85, 31);
+  color: white;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin: 2px;
+}
+body {
+  font-family: 'Open Sans';
+  color: rgb(54, 70, 78);
+  margin: 0px;
+  background-color: #f9f9f9;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 10px;
+}
