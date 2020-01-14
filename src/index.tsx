@@ -17,7 +17,7 @@ function parseInitialState(data) {
   return match[1]
 }
 
-const WS_PROXY = 'ws://ws-pass.herokuapp.com/'
+const WS_PROXY = 'wss://ws-pass.herokuapp.com/'
 // const WS_PROXY = 'ws://localhost:9000/'
 
 async function getStreamerName(regName: string) {
