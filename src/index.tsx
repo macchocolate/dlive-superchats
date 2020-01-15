@@ -4,14 +4,12 @@ import { getWithCors } from './util'
 import './styles'
 import day from 'dayjs'
 import Debug from 'debug'
-// import iconContact from '../assets/_ionicons_svg_md-contact.svg'
-import {IoMdContact, IoMdAlert, IoMdCheckmarkCircle} from 'react-icons/io'
-import {FiAlertCircle} from 'react-icons/fi'
-import {CSSTransition} from 'react-transition-group'
-
+import { IoMdContact, IoMdAlert, IoMdCheckmarkCircle } from 'react-icons/io'
+import { FiAlertCircle } from 'react-icons/fi'
+import { CSSTransition } from 'react-transition-group'
 
 // const debug = Debug('dchats')
-const debug = window.localStorage.debug ? console.log : function (){}
+const debug = window.localStorage.debug ? console.log : function() {}
 
 function parseInitialState(data) {
   const match = /partnerStatus.*?username":"(.*?)"/.exec(data)
@@ -103,10 +101,6 @@ async function openWs(regName: string, onGift: Function) {
   }
 }
 
-// const recentGifters = {}
-
-// const allChats = []
-
 function App() {
   const [error, setError] = useState<null | string>(null)
   const [loading, setLoading] = useState(true)
@@ -121,6 +115,7 @@ function App() {
     () => JSON.parse(localStorage.getItem(storageLocation())) || []
   )
   const [amountFilter, setAmountFilter] = useState(1)
+  const [viewType, setViewType] = useState<'gift' | 'price'>('gift')
 
   function onGift(data) {
     const giftData = data.payload.data.streamMessageReceived[0]
@@ -131,20 +126,13 @@ function App() {
 
     debug('got gift:', giftData)
 
-    
-    // if (giftData.gift === 'LEMON' || giftData.gift === 'ICE_CREAM') {
-      //   return
-      // }
-      const sender = giftData.sender.displayname
-      const createdAt =  giftData.createdAt.slice(0, -6)
-      const amount = getGiftPrice(giftData.gift, giftData.amount)
-      const avatar = giftData.sender.avatar || null
-      
-      // recentGifters[sender] = {lastUpdated: createdAt}
-
-
-    // debug(gifts)
-
+    if (giftData.gift === 'LEMON' || giftData.gift === 'ICE_CREAM') {
+      return
+    }
+    const sender = giftData.sender.displayname
+    const createdAt = giftData.createdAt.slice(0, -6)
+    const amount = getGiftPrice(giftData.gift, giftData.amount)
+    const avatar = giftData.sender.avatar || null
 
     setGifts((prevGifts) => {
       debug(prevGifts)
@@ -155,10 +143,12 @@ function App() {
           createdAt,
           id: giftData.id,
           sender,
+          gift: giftData.gift,
           amount,
           message: giftData.message
-        },
-    ]})
+        }
+      ]
+    })
   }
 
   useEffect(() => {
@@ -166,7 +156,9 @@ function App() {
     localStorage.setItem(storageLocation(), JSON.stringify(gifts))
   }, [gifts])
   useEffect(() => {
-    window.onhashchange = function () {window.location.reload()}
+    window.onhashchange = function() {
+      window.location.reload()
+    }
     if (streamer === 'demo') {
       setInterval(() => {
         onGift(generateMockGift())
@@ -175,12 +167,12 @@ function App() {
       return
     }
     openWs(streamer, onGift)
-    .then(()=>{
-      setLoading(false)
-    })
-    .catch(()=> {
-      setError(`streamer not found`)
-    })
+      .then(() => {
+        setLoading(false)
+      })
+      .catch(() => {
+        setError(`streamer not found`)
+      })
   }, [])
 
   return (
@@ -189,72 +181,196 @@ function App() {
         {gifts.map((v) => {
           if (v.amount < amountFilter) return
           return (
-            <CSSTransition appear={true} timeout={1000} classNames="fade" in={true}>
-
-            <div className="superchat" key={v.id}>
-              <div className="header">
-          <div className="sender-avatar" style={{padding: 4, fontSize:30, display:'flex', alignItems: 'center'}}>
-          {v.avatar ? <img width={30} height={30} src={v.avatar}/>: <IoMdContact/>}
-          </div>
-                <div className="sender-info">
-                <strong>{v.sender}</strong>
-                  <span className="money">
-                  <strong>${v.amount}</strong>
-                </span>
-                <span className="datetime">
-                  {day(+v.createdAt).format('hh:mma')}
-                </span>
+            <CSSTransition
+              appear={true}
+              timeout={1000}
+              classNames="fade"
+              in={true}
+            >
+              <div className="superchat" key={v.id}>
+                <div className="header">
+                  <div
+                    className="sender-avatar"
+                    style={{
+                      padding: 4,
+                      fontSize: 30,
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    {v.avatar ? (
+                      <img
+                        style={{ borderRadius: '50%' }}
+                        width={30}
+                        height={30}
+                        src={v.avatar}
+                      />
+                    ) : (
+                      <IoMdContact />
+                    )}
+                  </div>
+                  <div className="sender-info">
+                    <strong>{v.sender}</strong>
+                    {renderGiftAmount(v)}
+                    <span className="datetime">
+                      {day(+v.createdAt).format('hh:mma')}
+                    </span>
+                  </div>
                 </div>
+
+                <span className="message">{v.message}</span>
               </div>
-      
-              <span className="message">{v.message}</span>
-            </div>
             </CSSTransition>
           )
         })}
       </div>
       <div className="error-container">
-        {error && <div className="error-message"><div className="error-icon"><FiAlertCircle size={24}/></div><div className="message">{error}</div></div>}
+        {error && (
+          <div className="error-message">
+            <div className="error-icon">
+              <FiAlertCircle size={24} />
+            </div>
+            <div className="message">{error}</div>
+          </div>
+        )}
       </div>
-      
+
       <div className="fixed-header">
         <div className="streamer-info">
-          streamer:&nbsp;<strong>{streamer}</strong> {!loading && !error &&<span className="streamer-check"><IoMdCheckmarkCircle/></span>}
+          streamer:&nbsp;<strong>{streamer}</strong>{' '}
+          {!loading && !error && (
+            <span className="streamer-check">
+              <IoMdCheckmarkCircle />
+            </span>
+          )}
         </div>
         <div>
-
-        <label>
-          filter amount:&nbsp;<strong>$</strong>
-        </label>
-        <input
-          type="number"
-          max={1000}
-          min={0}
-          onChange={(e) => {
-            setAmountFilter(+e.currentTarget.value)
-          }}
-          value={amountFilter}
+          <label>
+            filter amount:&nbsp;<strong>$</strong>
+          </label>
+          <input
+            className="price-filter"
+            type="number"
+            max={1000}
+            min={0}
+            onChange={(e) => {
+              setAmountFilter(+e.currentTarget.value)
+            }}
+            value={amountFilter}
           />
-          </div>
-            <button className="clear-superchats" onClick={()=>{
-              window.localStorage.clear()
-              window.location.reload()
-            }}>clear all superchats</button>
+        </div>
+        <div>
+          <label>show dollar amounts:</label>
+          <input
+            type="checkbox"
+            checked={viewType === 'price'}
+            onChange={(e) => {
+              if (e.currentTarget.checked) {
+                return setViewType('price')
+              }
+              setViewType('gift')
+            }}
+          />
+        </div>
+        <button
+          className="clear-superchats"
+          onClick={() => {
+            window.localStorage.clear()
+            window.location.reload()
+          }}
+        >
+          clear all superchats
+        </button>
       </div>
-      <div className="clear-superchats">
-      </div>
+      <div className="clear-superchats"></div>
     </div>
   )
+
+  function renderGiftAmount(sender) {
+    if (viewType === 'price') {
+      return (
+        <span className="money">
+          <strong>${sender.amount}</strong>
+        </span>
+      )
+    }
+    return (
+      <span className="money">
+        <strong>{giftNames[sender.gift]}</strong>
+      </span>
+    )
+  }
 }
 
 render(<App />, document.getElementById('app'))
 
-const mockMessages = [
-  `Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.`,
-  'this is some stupid message'
+const mockMessages = `The two-thirds rule in the Senate should be eliminated. It is the refuge of the
+filibusterer, the obstructionist, and the devotee of minority rule, all of whom are foreign to a
+true democracy. This antique restriction adds immeasurably to clumsiness and deadlock in the
+treaty-ratifying process. In March, 1920 (though not in November, 1919), it was directly
+responsible for the defeat of the treaty. Effective international cooperation demands a price. That price is the yielding of some
+small part of our freedom of action, our sovereignty, so that we may, through preventing
+international disorders, enjoy greater freedom of action. The good things of life may be free,
+but peace is not one of them. One of the supreme follies of the American people in the postVersailles years was to demand rights, while shunning responsibilities. We found ourselves in
+the immoral and disastrous position of seeking all the immunities, privileges, and advantages
+of riding in the international boat, while refusing to pull the laboring oar of liabilities,
+responsibilities, and costs. Compromise may be as essential in peace-ratifying as in peacemaking. Certainly this
+was true in Washington during 1919-1920. A stubborn refusal to compromise when the
+people demand compromise not only is undemocratic, but may, as it did in 1920, lead to the
+defeat of the entire treaty. Sovereignty is a sacred cow tied across the path of international cooperation. It
+conjures up all kinds of unwarranted fears. But an impairment of sovereignty, of national
+freedom of action, is a characteristic of treaties entered into on a free and friendly basis.
+Broadly speaking, a treaty is a promise to give up, in return for something else, that which we
+would ordinarily do. The United States has entered into hundreds of international agreements,
+but our sovereignty is essentially unimpaired. An excess of suspicions [a Yankee horse-trading trait] is a barrier to international
+cooperation. Peace can be preserved only among men of good will, for it is a blessing which
+rests not so much on paper pacts as on attitudes of mind. Peace can no more be maintained by
+parchment than sobriety can be maintained by constitutional amendments. In 1919 we were the most powerful and secluded of the great nations, yet we acted as
+though we were the weakest and most vulnerable. Rich though we were, we feared that we
+might be asked to contribute one cent more than our proper share; powerful though we were,
+we feared that a few thousand of our soldiers might be sent abroad to prevent ten million from
+following them. We confessed by our conduct that our representatives were not intelligent
+enough to sit down at the same table with those of other nations, even though we had the
+highest stack of chips and most of the high cards.`
+  .split('.')
+  .filter((v) => Boolean(v.trim()))
+
+const mockSenders = [
+  {
+    displayname: 'Patrick',
+    avatar: 'https://i.imgur.com/dIX6QcT.png'
+  },
+  {
+    displayname: 'Spongebob',
+    avatar: 'https://i.imgur.com/0O3G4ek.png'
+  },
+  {
+    displayname: 'Mr.Krabs',
+    avatar: 'https://i.imgur.com/5qV11rs.png'
+  },
+  {
+    displayname: 'Squidward',
+    avatar: 'https://i.imgur.com/wuaWw4Z.png'
+  },
+  { displayname: 'BoomerMan', avatar: 'https://i.imgur.com/vbNqpCk.png' },
+  {
+    displayname: 'Chocolate Man',
+    avatar: 'https://i.imgur.com/RtoUnZG.png'
+  },
+  {
+    displayname: 'anonymous',
+    avatar: null
+  }
 ]
 
 const lemonPrice = 0.015
+const giftNames = {
+  LEMON: 'lemon',
+  ICE_CREAM: 'ice cream',
+  DIAMOND: 'diamond',
+  NINJAGHINI: 'ninjaghini',
+  NINJET: 'ninjet'
+}
 const prices = {
   LEMON: lemonPrice,
   ICE_CREAM: lemonPrice * 10,
@@ -275,29 +391,22 @@ const generateMockGift = () => {
   newGift.payload.data.streamMessageReceived[0].id = (
     Math.random() * 100000
   ).toFixed(0)
-  const mockUsernames = [
-    'Spongebob',
-    'Patrick',
-    'Sandy Cheeks',
-    'Eugiune Krabs',
-    'Plankton',
-    'Squidward'
-  ]
-  newGift.payload.data.streamMessageReceived[0].sender.displayname = getRandomOf(
-    mockUsernames
-  )
+  // newGift.payload.data.streamMessageReceived[0].sender.displayname = getRandomOf(
+  //   mockUsernames
+  // )
   const giftTypes = Object.keys(prices)
   newGift.payload.data.streamMessageReceived[0].gift = getRandomOf(giftTypes)
-  newGift.payload.data.streamMessageReceived[0].amount = getRandomOf(
-    Array(5)
-      .fill('')
-      .map((x, i) => i + 1)
+  // newGift.payload.data.streamMessageReceived[0].amount = getRandomOf(
+  //   Array(5)
+  //     .fill('')
+  //     .map((x, i) => i + 1)
+  // )
+
+  // .avatar = getRandomOf(mockImages)
+
+  newGift.payload.data.streamMessageReceived[0].sender = getRandomOf(
+    mockSenders
   )
-
-  if (Math.random() < 0.7) {
-    newGift.payload.data.streamMessageReceived[0].sender.avatar = null
-  }
-
   newGift.payload.data.streamMessageReceived[0].message = getRandomOf(
     mockMessages
   )
@@ -338,7 +447,6 @@ const ex2payload = {
   id: '10',
   type: 'data'
 }
-
 
 // const req = {
 //   "id":"2",
@@ -474,7 +582,7 @@ const ex2payload = {
 //         __typename
 //     }
 //   }
-    
+
 //     fragment VStreamChatSenderInfoFrag on SenderInfo {
 //         subscribing
 //         role
