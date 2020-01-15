@@ -1,8 +1,11 @@
+$blue: rgb(17, 82, 147);
+
+
 .superchat-container {
   margin: 0 20px;
-  margin-top: 60px;
+  margin-top: 20px;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-content: flex-end;
   justify-content: end;
   padding: 10px 0;
@@ -12,44 +15,135 @@
   width: 100%;
 }
 
+.sender-avatar {
+  margin-right: 4px;
+}
+
+.fade-appear {
+  transition: opacity 500ms;
+  opacity: 0
+}
+
+.fade-appear-active {
+  opacity: 1;
+}
+
+
+.sender-info {
+  margin-top: 4px;
+  font-size: 14px;
+  display: flex;
+  align-items: baseline;
+  // flex-direction: column;
+}
+
 .superchat {
-  margin-bottom: 24px;
+  background-color: #00daaf;
+  max-width: 600px;
+  margin-bottom: 15px;
   display: flex;
   flex-direction: column;
-}
-
-.clear-superchats {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-
-  button {
-    background-color: salmon;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    outline: none;
-    cursor: pointer;
-    font-weight: bold;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12);
+  .header {
+    display: flex;
+    align-items: center;
+    background-color: #00b89f;
+    padding: 2px 4px
+  }
+  .message {
+    font-size: 14px;
+    padding: 6px 14px;
+    // margin: 10px 10px;
+    // margin-left: 14px;
+    // margin-bottom: 8px;
+    // margin-top: 6px;
   }
 }
+
+.error-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  padding: 10px;
+  
+
+  .error-message {
+    display: flex;
+    align-items: center;
+    padding: 2px 16px;
+    border-radius: 4px;
+    color: rgb(97, 26, 21);
+    background-color: rgb(253, 236, 234);
+
+    .message {
+      display: flex;
+      padding: 8px 0;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .error-icon {
+      display: flex;
+      opacity: 0.9;
+      padding: 7px 0;
+      font-size: 22px;
+      margin-right: 12px;
+    
+    display: flex;
+    align-items: center;
+    }
+  }
+}
+
+button {
+  color: rgba(0, 0, 0, 0.87);
+  padding: 6px 16px;
+  font-size: 14px;
+  min-width: 64px;
+  box-sizing: border-box;
+  transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  font-weight: 500;
+  line-height: 1.75;
+  border-radius: 4px;
+  letter-spacing: 0.02857em;
+  text-transform: uppercase;
+  box-shadow: 0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12);
+}
+
+
+  
 
 * {
   box-sizing: border-box;
 }
 
-.message {
-  font-size: 14px;
-  margin-left: 14px;
-}
 
-.amount-filter {
-  background: #f9f9f9;
+
+.fixed-header {
+  // background: #f9f9f9;
   font-size: 14px;
   position: fixed;
+  top: 0;
+  left: 0;
+  // align-items: flex-end;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  
+  // height: 0;
   // font-weight: bold;
-  top: 10px;
-  left: 10px;
+  width: 100%;
+  display: flex;
+  overflow: visible;
+  // top: 10px;
+  // left: 10px;
 
   input {
     width: 60px;
@@ -58,6 +152,36 @@
     padding: 6px 2px;
     outline: none;
   }
+
+  div,button {
+    margin: 0 10px;
+
+  }
+
+  .streamer-info {
+    display: flex;
+    // align-items: center;
+    .streamer-check {
+      display: flex;
+      align-items: center;
+      color: rgb(125, 202, 9);
+    }
+  }
+  .clear-superchats {
+    color: #fff;
+    background-color: $blue;
+    // background-color: rgb(220, 0, 78);
+    // background-color: salmon;
+    padding: 8px 6px;
+
+    color: white;
+    border: none;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
 }
 
 .datetime {
@@ -66,15 +190,14 @@
 
 .money {
   font-size: 12px;
-  background-color: rgb(31, 85, 31);
-  color: white;
   border-radius: 4px;
   padding: 2px 6px;
   margin: 2px;
 }
 body {
-  font-family: 'Open Sans';
-  color: rgb(54, 70, 78);
+  // font-family: 'Open Sans';
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  color: #202020;
   margin: 0px;
   background-color: #f9f9f9;
   display: flex;

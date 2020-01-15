@@ -44,7 +44,7 @@ const config: webpack.Configuration = {
         use: 'raw-loader'
       },
       {
-        test: /\.(png)$/,
+        test: /\.(png|svg)$/,
         use: 'url-loader'
       },
       {

@@ -4,8 +4,14 @@ import { getWithCors } from './util'
 import './styles'
 import day from 'dayjs'
 import Debug from 'debug'
+// import iconContact from '../assets/_ionicons_svg_md-contact.svg'
+import {IoMdContact, IoMdAlert, IoMdCheckmarkCircle} from 'react-icons/io'
+import {FiAlertCircle} from 'react-icons/fi'
+import {CSSTransition} from 'react-transition-group'
 
-const debug = Debug('dchats')
+
+// const debug = Debug('dchats')
+const debug = window.localStorage.debug ? console.log : function (){}
 
 function parseInitialState(data) {
   const match = /partnerStatus.*?username":"(.*?)"/.exec(data)
@@ -97,7 +103,13 @@ async function openWs(regName: string, onGift: Function) {
   }
 }
 
+// const recentGifters = {}
+
+// const allChats = []
+
 function App() {
+  const [error, setError] = useState<null | string>(null)
+  const [loading, setLoading] = useState(true)
   const [streamer, setStreamer] = useState(
     () => window.location.hash.slice(1) || 'demo'
   )
@@ -112,26 +124,41 @@ function App() {
 
   function onGift(data) {
     const giftData = data.payload.data.streamMessageReceived[0]
-    debug('got gift:', giftData)
+
     if (giftData.type !== 'Gift') {
       return
     }
 
-    if (giftData.gift === 'LEMON' || giftData.gift === 'ICE_CREAM') {
-      return
-    }
-    const amount = getGiftPrice(giftData.gift, giftData.amount)
+    debug('got gift:', giftData)
 
-    setGifts((prevGifts) => [
-      {
-        createdAt: giftData.createdAt,
-        id: giftData.id,
-        sender: giftData.sender.displayname,
-        amount,
-        message: giftData.message
-      },
-      ...prevGifts
-    ])
+    
+    // if (giftData.gift === 'LEMON' || giftData.gift === 'ICE_CREAM') {
+      //   return
+      // }
+      const sender = giftData.sender.displayname
+      const createdAt =  giftData.createdAt.slice(0, -6)
+      const amount = getGiftPrice(giftData.gift, giftData.amount)
+      const avatar = giftData.sender.avatar || null
+      
+      // recentGifters[sender] = {lastUpdated: createdAt}
+
+
+    // debug(gifts)
+
+
+    setGifts((prevGifts) => {
+      debug(prevGifts)
+      return [
+        ...prevGifts,
+        {
+          avatar,
+          createdAt,
+          id: giftData.id,
+          sender,
+          amount,
+          message: giftData.message
+        },
+    ]})
   }
 
   useEffect(() => {
@@ -140,13 +167,20 @@ function App() {
   }, [gifts])
   useEffect(() => {
     window.onhashchange = function () {window.location.reload()}
-    if (debug.enabled || streamer === 'demo') {
+    if (streamer === 'demo') {
       setInterval(() => {
         onGift(generateMockGift())
       }, 500)
+      setLoading(true)
       return
     }
     openWs(streamer, onGift)
+    .then(()=>{
+      setLoading(false)
+    })
+    .catch(()=> {
+      setError(`streamer not found`)
+    })
   }, [])
 
   return (
@@ -155,43 +189,59 @@ function App() {
         {gifts.map((v) => {
           if (v.amount < amountFilter) return
           return (
+            <CSSTransition appear={true} timeout={1000} classNames="fade" in={true}>
+
             <div className="superchat" key={v.id}>
-              <div>
+              <div className="header">
+          <div className="sender-avatar" style={{padding: 4, fontSize:30, display:'flex', alignItems: 'center'}}>
+          {v.avatar ? <img width={30} height={30} src={v.avatar}/>: <IoMdContact/>}
+          </div>
+                <div className="sender-info">
                 <strong>{v.sender}</strong>
-                <span className="money">
+                  <span className="money">
                   <strong>${v.amount}</strong>
                 </span>
                 <span className="datetime">
-                  {day(+v.createdAt.slice(0, -6)).format('hh:mma')}
+                  {day(+v.createdAt).format('hh:mma')}
                 </span>
+                </div>
               </div>
+      
               <span className="message">{v.message}</span>
             </div>
+            </CSSTransition>
           )
         })}
       </div>
-      <div className="amount-filter">
-        <div>
-          streamer: <strong>{streamer}</strong>
+      <div className="error-container">
+        {error && <div className="error-message"><div className="error-icon"><FiAlertCircle size={24}/></div><div className="message">{error}</div></div>}
+      </div>
+      
+      <div className="fixed-header">
+        <div className="streamer-info">
+          streamer:&nbsp;<strong>{streamer}</strong> {!loading && !error &&<span className="streamer-check"><IoMdCheckmarkCircle/></span>}
         </div>
+        <div>
+
         <label>
-          filter amount:&nbsp; <strong>$</strong>
+          filter amount:&nbsp;<strong>$</strong>
         </label>
         <input
           type="number"
           max={1000}
-          min={1}
+          min={0}
           onChange={(e) => {
             setAmountFilter(+e.currentTarget.value)
           }}
           value={amountFilter}
-        />
+          />
+          </div>
+            <button className="clear-superchats" onClick={()=>{
+              window.localStorage.clear()
+              window.location.reload()
+            }}>clear all superchats</button>
       </div>
       <div className="clear-superchats">
-          <button onClick={()=>{
-            window.localStorage.clear()
-            window.location.reload()
-          }}>clear all superchats</button>
       </div>
     </div>
   )
@@ -244,6 +294,10 @@ const generateMockGift = () => {
       .map((x, i) => i + 1)
   )
 
+  if (Math.random() < 0.7) {
+    newGift.payload.data.streamMessageReceived[0].sender.avatar = null
+  }
+
   newGift.payload.data.streamMessageReceived[0].message = getRandomOf(
     mockMessages
   )
@@ -284,3 +338,158 @@ const ex2payload = {
   id: '10',
   type: 'data'
 }
+
+
+// const req = {
+//   "id":"2",
+//   "type":"start",
+//   "payload":{
+//     "variables":{
+//       "streamer":"theralphretort"
+//     },"extensions":{
+//       "persistedQuery":{
+//         "version":1,"sha256Hash":"feb450b243f3dc91f7672129876b5c700b6594b9ce334bc71f574653181625d5"
+//       }
+//     },
+//     "operationName":"StreamMessageSubscription",
+//     "query":`subscription StreamMessageSubscription($streamer: String!) {
+//         streamMessageReceived(streamer: $streamer) {
+//           type
+//           ... on ChatGift {
+//             id
+//             gift
+//             amount
+//             message
+//             recentCount
+//             expireDuration
+//             ...VStreamChatSenderInfoFrag
+//             __typename
+//         }
+//         ... on ChatHost {
+//             id
+//             viewer
+//             ...VStreamChatSenderInfoFrag
+//             __typename
+//         }
+//         ... on ChatSubscription {
+//             id
+//             month
+//             ...VStreamChatSenderInfoFrag
+//             __typename
+//         }
+//         ... on ChatExtendSub {
+//             id
+//             month
+//             length
+//             ...VStreamChatSenderInfoFrag
+//             __typename
+//         }
+//         ... on ChatChangeMode {
+//             mode
+//             __typename
+//         }
+//         ... on ChatText {
+//             id
+//             content
+//             subLength
+//             ...VStreamChatSenderInfoFrag
+//             __typename
+//         }
+//         ... on ChatSubStreak {
+//             id
+//             ...VStreamChatSenderInfoFrag
+//             length
+//             __typename
+//         }
+//         ... on ChatClip {
+//             id
+//             url
+//             ...VStreamChatSenderInfoFrag
+//             __typename
+//         }
+//         ... on ChatFollow {
+//             id
+//             ...VStreamChatSenderInfoFrag
+//             __typename
+//         }
+//         ... on ChatDelete {
+//             ids
+//             __typename
+//         }
+//         ... on ChatBan {
+//             id
+//             ...VStreamChatSenderInfoFrag
+//             bannedBy {
+//               id
+//               displayname
+//               __typename
+//           }
+//           bannedByRoomRole
+//           __typename
+//       }
+//         ... on ChatModerator {
+//             id
+//             ...VStreamChatSenderInfoFrag
+//             add
+//             __typename
+//         }
+//         ... on ChatEmoteAdd {
+//             id
+//             ...VStreamChatSenderInfoFrag
+//             emote
+//             __typename
+//         }
+//         ... on ChatTimeout {
+//             id
+//             ...VStreamChatSenderInfoFrag
+//             minute
+//             bannedBy {
+//               id
+//               displayname
+//               __typename
+//           }
+//           bannedByRoomRole
+//           __typename
+//       }
+//         ... on ChatTCValueAdd {
+//             id
+//             ...VStreamChatSenderInfoFrag
+//             amount
+//             totalAmount
+//             __typename
+//         }
+//         ... on ChatGiftSub {
+//             id
+//             ...VStreamChatSenderInfoFrag
+//             count
+//             receiver
+//             __typename
+//         }
+//         ... on ChatGiftSubReceive {
+//             id
+//             ...VStreamChatSenderInfoFrag
+//             gifter
+//             __typename
+//         }
+//         __typename
+//     }
+//   }
+    
+//     fragment VStreamChatSenderInfoFrag on SenderInfo {
+//         subscribing
+//         role
+//         roomRole
+//         sender {
+//           id
+//           username
+//           displayname
+//           avatar
+//           partnerStatus
+//           badges
+//           effect
+//           __typename
+//       }
+//       __typename
+//   }
+//     `
+//   }}
