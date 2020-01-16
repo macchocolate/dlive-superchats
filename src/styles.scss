@@ -1,5 +1,9 @@
 $blue: rgb(17, 82, 147);
 
+html {
+  scroll-behavior: smooth;
+}
+
 .superchat-container {
   color: #202020;
   margin: 0 20px;
@@ -12,6 +16,10 @@ $blue: rgb(17, 82, 147);
   padding: 10px 0;
 }
 
+a {
+  color: rgb(126, 169, 250);
+  text-decoration: none;
+}
 #app {
   width: 100%;
 }
@@ -265,7 +273,7 @@ button {
     display: flex;
     align-items: center;
     margin: 0 10px;
-    margin-top: 10px;
+    margin-top: 5px;
   }
 
   .MuiCheckbox-root {

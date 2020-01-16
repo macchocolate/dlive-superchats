@@ -145,6 +145,11 @@ document.addEventListener('keydown', (e) => {
 })
 
 const tips = {
+  'demo-link': (
+    <span>
+      <a href="/#demo">demo page for testing new features</a>
+    </span>
+  ),
   'use-spacebar': (
     <span>
       Click on a chat and navigate to the next one with <kbd>spacebar</kbd>{' '}
@@ -340,7 +345,7 @@ function App() {
 
       <div className="fixed-header">
         <div className="streamer-info">
-          <strong>{streamer}</strong>
+          <strong>{streamer}&nbsp;</strong>
           {!loading && !error && (
             <span className="streamer-check">
               <IoMdCheckmarkCircle />
