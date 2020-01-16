@@ -1,9 +1,10 @@
 $blue: rgb(17, 82, 147);
 
 .superchat-container {
+  color: #202020;
   margin: 0 20px;
   max-width: 600px;
-  margin-top: 20px;
+  margin-top: 80px;
   display: flex;
   flex-direction: column-reverse;
   align-content: flex-end;
@@ -123,11 +124,16 @@ button {
 }
 
 .fixed-header {
-  left: 650px;
+
+  background: rgb(49, 49, 49);
+
+  // left: 650px;
   // background: #f9f9f9;
   font-size: 14px;
   position: fixed;
   top: 0;
+  min-width: max-content;
+  width:100%;
   // left: 0;
   // align-items: flex-end;
   justify-content: center;
@@ -138,16 +144,21 @@ button {
   // font-weight: bold;
   // width: 100%;
   display: flex;
-  overflow: visible;
+  overflow: scroll;
+  // overflow: visible;
   // top: 10px;
   // left: 10px;
 
   .price-filter {
+    margin-left: 4px;
     width: 60px;
     border-radius: 4px;
     border: none;
     padding: 6px 2px;
     outline: none;
+    color:white;
+    background-color: #4a4a4a;
+
   }
 
   div,
@@ -194,11 +205,13 @@ button {
   margin: 2px;
 }
 body {
+  background-color: #272727;
+  color: #e2e2e2;
+  // color: #202020;
+  // background-color: #f9f9f9;
   // font-family: 'Open Sans';
   font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
-  color: #202020;
   margin: 0px;
-  background-color: #f9f9f9;
   display: flex;
   justify-content: center;
   padding-bottom: 10px;

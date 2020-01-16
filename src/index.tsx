@@ -101,6 +101,22 @@ async function openWs(regName: string, onGift: Function) {
   }
 }
 
+const lemonPrice = 0.015
+const giftNames = {
+  LEMON: 'lemon',
+  ICE_CREAM: 'ice cream',
+  DIAMOND: 'diamond',
+  NINJAGHINI: 'ninjaghini',
+  NINJET: 'ninjet'
+}
+const prices = {
+  LEMON: lemonPrice,
+  ICE_CREAM: lemonPrice * 10,
+  DIAMOND: lemonPrice * 100,
+  NINJAGHINI: lemonPrice * 1000,
+  NINJET: lemonPrice * 10000
+}
+
 function App() {
   const [error, setError] = useState<null | string>(null)
   const [loading, setLoading] = useState(true)
@@ -182,12 +198,13 @@ function App() {
           if (v.amount < amountFilter) return
           return (
             <CSSTransition
+            key={v.id}
               appear={true}
               timeout={1000}
               classNames="fade"
               in={true}
             >
-              <div className="superchat" key={v.id}>
+              <div className="superchat" >
                 <div className="header">
                   <div
                     className="sender-avatar"
@@ -237,7 +254,7 @@ function App() {
 
       <div className="fixed-header">
         <div className="streamer-info">
-          streamer:&nbsp;<strong>{streamer}</strong>{' '}
+          <strong>{streamer}</strong>
           {!loading && !error && (
             <span className="streamer-check">
               <IoMdCheckmarkCircle />
@@ -363,21 +380,7 @@ const mockSenders = [
   }
 ]
 
-const lemonPrice = 0.015
-const giftNames = {
-  LEMON: 'lemon',
-  ICE_CREAM: 'ice cream',
-  DIAMOND: 'diamond',
-  NINJAGHINI: 'ninjaghini',
-  NINJET: 'ninjet'
-}
-const prices = {
-  LEMON: lemonPrice,
-  ICE_CREAM: lemonPrice * 10,
-  DIAMOND: lemonPrice * 100,
-  NINJAGHINI: lemonPrice * 1000,
-  NINJET: lemonPrice * 10000
-}
+
 function getGiftPrice(giftname: string, amount = 1) {
   return (prices[giftname] * +amount).toFixed(2)
 }
