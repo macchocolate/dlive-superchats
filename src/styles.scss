@@ -4,7 +4,7 @@ $blue: rgb(17, 82, 147);
   color: #202020;
   margin: 0 20px;
   max-width: 600px;
-  margin-top: 80px;
+  margin-top: 50px;
   display: flex;
   flex-direction: column-reverse;
   align-content: flex-end;
@@ -14,6 +14,21 @@ $blue: rgb(17, 82, 147);
 
 #app {
   width: 100%;
+}
+
+.tips {
+  display: flex;
+  flex-direction: column;
+  .tip {
+    width: 400px;
+    line-height: 1.4;
+    margin-bottom: 10px;
+    background-color: rgb(70, 70, 70);
+    padding: 6px 10px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+  }
 }
 
 .sender-avatar {
@@ -38,7 +53,22 @@ $blue: rgb(17, 82, 147);
 }
 
 .superchat {
-  background-color: #00daaf;
+  background-color: #b8b8b8;
+  &.NINJET {
+    background-color: #dacb00;
+
+    .header {
+      background-color: #b8ac00;
+    }
+  }
+  &.NINJAGHINI {
+    background-color: #00daaf;
+
+    .header {
+      background-color: #00b89f;
+    }
+  }
+
   margin-bottom: 15px;
   display: flex;
   flex-direction: column;
@@ -46,10 +76,18 @@ $blue: rgb(17, 82, 147);
   overflow: hidden;
   box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2),
     0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+  outline: none;
+  transition: box-shadow 100ms;
+  &:focus {
+    box-shadow: 0px 0px 0px 3px rgba(255, 255, 255, 0.753);
+    // 0px 0px 5px 0px rgba(255, 255, 255, 0.63),
+    // 0px 0px 3px 0px rgba(255, 255, 255, 0.623);
+    // border: 6px solid white;
+  }
   .header {
     display: flex;
     align-items: center;
-    background-color: #00b89f;
+    background-color: #979797;
     padding: 2px 4px;
   }
   .message {
@@ -60,7 +98,63 @@ $blue: rgb(17, 82, 147);
     // margin-bottom: 8px;
     // margin-top: 6px;
   }
+
+  // .ICE_CREAM {
+  //   background-color: #00daaf;
+  // }
+  // .DIAMOND {
+  //   background-color: #95a3e054;
+  // }
+  // .NINJAGHINI {
+  //   background-color: #8dc03b;
+  // }
+  // .NINJET {
+  //   background-color: #d6c90d;
+  // }
 }
+
+.chest {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 0;
+  > div {
+    display: flex;
+    align-items: center;
+    color: white;
+    background-color: #4a4a4a;
+    // @extend .card-base;
+    width: max-content;
+    text-transform: lowercase;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    padding: 4px 8px;
+    margin-top: -50px;
+    > div {
+      margin-left: 10px;
+    }
+    border-radius: 4px;
+    outline: none;
+
+    box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
+      0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    transition: all 200ms;
+    // height: 0;
+    &:focus {
+      opacity: 1;
+    }
+  }
+}
+
+// .fade-up-appear {
+//   transition: all 200ms;
+//   opacity: 0;
+// }
+
+// .fade-up-enter {
+//   opacity: 1;
+// }
 
 .error-container {
   position: fixed;
@@ -102,6 +196,10 @@ $blue: rgb(17, 82, 147);
 
 button {
   color: rgba(0, 0, 0, 0.87);
+  @extend .card-base;
+}
+
+.card-base {
   padding: 6px 16px;
   font-size: 14px;
   min-width: 64px;
@@ -124,6 +222,8 @@ button {
 }
 
 .fixed-header {
+  left: 660px;
+  flex-direction: column;
 
   background: rgb(49, 49, 49);
 
@@ -131,20 +231,20 @@ button {
   // background: #f9f9f9;
   font-size: 14px;
   position: fixed;
-  top: 0;
+  top: 10px;
   min-width: max-content;
-  width:100%;
+  // width:100%;
   // left: 0;
   // align-items: flex-end;
   justify-content: center;
-  align-items: center;
+  // align-items: center;
   padding: 10px;
 
   // height: 0;
   // font-weight: bold;
   // width: 100%;
   display: flex;
-  overflow: scroll;
+  // overflow: scroll;
   // overflow: visible;
   // top: 10px;
   // left: 10px;
@@ -156,21 +256,25 @@ button {
     border: none;
     padding: 6px 2px;
     outline: none;
-    color:white;
+    color: white;
     background-color: #4a4a4a;
-
   }
 
-  div,
-  button {
-    
-        display: flex;
-        align-items: center;
+  > div,
+  > button {
+    display: flex;
+    align-items: center;
     margin: 0 10px;
+    margin-top: 10px;
+  }
+
+  .MuiCheckbox-root {
+    color: white;
   }
 
   .streamer-info {
     display: flex;
+    margin-left: 20px;
     // align-items: center;
     .streamer-check {
       display: flex;
@@ -179,6 +283,9 @@ button {
     }
   }
   .clear-superchats {
+    align-self: flex-end;
+    max-width: max-content;
+    margin-top: 60px;
     color: #fff;
     background-color: $blue;
     // background-color: rgb(220, 0, 78);

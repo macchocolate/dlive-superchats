@@ -1,14 +1,27 @@
 import React, { useState, useEffect } from 'react'
 import { render } from 'react-dom'
 import { getWithCors } from './util'
+import { WebSocketRetry } from './WebsocketRetry'
 import './styles'
 import day from 'dayjs'
-import Debug from 'debug'
-import { IoMdContact, IoMdAlert, IoMdCheckmarkCircle } from 'react-icons/io'
+// import Debug from 'debug'
+import {
+  IoMdContact,
+  IoMdAlert,
+  IoMdCheckmarkCircle,
+  IoMdClose,
+  IoIosGift,
+  IoMdInformationCircleOutline,
+} from 'react-icons/io'
 import { FiAlertCircle } from 'react-icons/fi'
 import { CSSTransition } from 'react-transition-group'
+import Checkbox from '@material-ui/core/Checkbox'
+// import {} from 'react-icons/fa'
+const console = window.console
+// import useMediaQuery from '@material-ui/core/useMediaQuery'
 
 // const debug = Debug('dchats')
+// const debug = console.log
 const debug = window.localStorage.debug ? console.log : function() {}
 
 function parseInitialState(data) {
@@ -31,11 +44,17 @@ async function getStreamerName(regName: string) {
 
 async function openWs(regName: string, onGift: Function) {
   const streamername = await getStreamerName(regName)
-  const ws = new WebSocket(
+
+  // const ws = new WebSocket(
+  const ws = WebSocketRetry(
     `${WS_PROXY}wss://graphigostream.prd.dlive.tv?origin=https://dlive.tv&host=graphigostream.prd.dlive.tv`,
-    'graphql-ws'
+    'graphql-ws',
+    {
+      // retry: 5
+    },
   )
-  ws.onmessage = (mes) => {
+
+  ws.onmessage = (mes: any) => {
     if (!mes || !mes.data) return
     const data = JSON.parse(mes.data)
     if (data.type === 'ka' || data.type === 'connection_ack') {
@@ -43,14 +62,14 @@ async function openWs(regName: string, onGift: Function) {
     }
     onGift(data)
   }
-  ws.onerror = console.error
 
   ws.onopen = function() {
+    debug('onopen called')
     ws.send(
       JSON.stringify({
         type: 'connection_init',
-        payload: {}
-      })
+        payload: {},
+      }),
     )
 
     ws.send(
@@ -94,9 +113,9 @@ async function openWs(regName: string, onGift: Function) {
        }
        __typename
     }
-      `
-        }
-      })
+      `,
+        },
+      }),
     )
   }
 }
@@ -107,33 +126,68 @@ const giftNames = {
   ICE_CREAM: 'ice cream',
   DIAMOND: 'diamond',
   NINJAGHINI: 'ninjaghini',
-  NINJET: 'ninjet'
+  NINJET: 'ninjet',
 }
+// type giftName = 'LEMON' | 'ICE_CREAM' | 'DIAMOND' | 'NINJAGHINI' | 'NINJET'
+
 const prices = {
   LEMON: lemonPrice,
   ICE_CREAM: lemonPrice * 10,
   DIAMOND: lemonPrice * 100,
   NINJAGHINI: lemonPrice * 1000,
-  NINJET: lemonPrice * 10000
+  NINJET: lemonPrice * 10000,
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === ' ') {
+    e.preventDefault()
+  }
+})
+
+const tips = {
+  'use-spacebar': (
+    <span>
+      Click on a chat and navigate to the next one with <kbd>spacebar</kbd>{' '}
+    </span>
+  ),
+  'clear-chats-before-show': (
+    <span>
+      Before a show, click{' '}
+      <em>
+        <strong>clear all chats</strong>
+      </em>{' '}
+      <br />
+      (refreshing the page will not lose any chats)
+    </span>
+  ),
+  'debug-error': (
+    <span>If something isn't working, try refreshing the page.</span>
+  ),
 }
 
 function App() {
   const [error, setError] = useState<null | string>(null)
   const [loading, setLoading] = useState(true)
   const [streamer, setStreamer] = useState(
-    () => window.location.hash.slice(1) || 'demo'
+    () => window.location.hash.slice(1) || 'demo',
   )
   function storageLocation() {
     return `${streamer}-gifts`
   }
   debug({ streamer })
-  const [gifts, setGifts] = useState(
-    () => JSON.parse(localStorage.getItem(storageLocation())) || []
-  )
-  const [amountFilter, setAmountFilter] = useState(1)
+  const [gifts, setGifts] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(storageLocation()) || '[]')
+    } catch (e) {
+      console.error(e)
+      return []
+    }
+  })
+
+  const [amountFilter, setAmountFilter] = useState(0)
   const [viewType, setViewType] = useState<'gift' | 'price'>('gift')
 
-  function onGift(data) {
+  function onGift(data: any) {
     const giftData = data.payload.data.streamMessageReceived[0]
 
     if (giftData.type !== 'Gift') {
@@ -155,14 +209,14 @@ function App() {
       return [
         ...prevGifts,
         {
-          avatar,
+          avatar: avatar && '' + avatar,
           createdAt,
-          id: giftData.id,
-          sender,
+          id: '' + giftData.id,
+          sender: '' + sender,
           gift: giftData.gift,
           amount,
-          message: giftData.message
-        }
+          message: '' + giftData.message,
+        },
       ]
     })
   }
@@ -176,39 +230,57 @@ function App() {
       window.location.reload()
     }
     if (streamer === 'demo') {
-      setInterval(() => {
+      let mockCount = 0
+      let mockInterval = setInterval(() => {
         onGift(generateMockGift())
+        mockCount++
+        if (mockCount > 20) {
+          clearInterval(mockInterval)
+        }
       }, 500)
       setLoading(true)
       return
     }
+
     openWs(streamer, onGift)
       .then(() => {
         setLoading(false)
       })
-      .catch(() => {
+      .catch((e) => {
+        window.console.error(e)
         setError(`streamer not found`)
       })
   }, [])
 
   return (
     <div>
-      <div style={{marginTop:80}}>
-        Hey king, there was a bug- its fixed for future shows, please use this imgur album tonight <a href="https://imgur.com/a/k2j02jc">superchat screencaps</a>
-
-      </div>
       <div className="superchat-container">
-        {gifts.map((v) => {
+        {gifts.map((v: any) => {
           if (v.amount < amountFilter) return
           return (
             <CSSTransition
-            key={v.id}
               appear={true}
               timeout={1000}
               classNames="fade"
               in={true}
+              key={v.id}
+              tabIndex={1}
+              onKeyDown={(e: KeyboardEvent) => {
+                console.log(e.key)
+                if (e.key === ' ') {
+                  // @ts-ignore
+                  const nextSibling = e.currentTarget.nextSibling
+                  if (nextSibling && nextSibling.matches('.superchat')) {
+                    nextSibling.focus()
+                  } else {
+                    // @ts-ignore
+                    document.querySelector('.chest [tabIndex]').focus()
+                  }
+                  e.preventDefault()
+                }
+              }}
             >
-              <div className="superchat" >
+              <div className={`superchat ${v.gift}`}>
                 <div className="header">
                   <div
                     className="sender-avatar"
@@ -216,7 +288,7 @@ function App() {
                       padding: 4,
                       fontSize: 30,
                       display: 'flex',
-                      alignItems: 'center'
+                      alignItems: 'center',
                     }}
                   >
                     {v.avatar ? (
@@ -239,11 +311,21 @@ function App() {
                   </div>
                 </div>
 
-                <span className="message">{v.message}</span>
+                <span className="message">{'' + v.message}</span>
               </div>
             </CSSTransition>
           )
         })}
+        <div className="chest">
+          <div tabIndex={1}>
+            <img
+              src="https://dlive.tv/img/chest-close.6621d724.png"
+              width={40}
+              height={40}
+            />
+            {/* <div>chest mode ?</div> */}
+          </div>
+        </div>
       </div>
       <div className="error-container">
         {error && (
@@ -266,24 +348,20 @@ function App() {
           )}
         </div>
         <div>
-          <label>
-            filter amount:&nbsp;<strong>$</strong>
-          </label>
-          <input
-            className="price-filter"
-            type="number"
-            max={1000}
-            min={0}
+          <Checkbox
+            checked={amountFilter === 5}
             onChange={(e) => {
-              setAmountFilter(+e.currentTarget.value)
+              if (e.currentTarget.checked) {
+                setAmountFilter(5)
+              } else {
+                setAmountFilter(0)
+              }
             }}
-            value={amountFilter}
           />
+          <label>&nbsp;exclude diamonds</label>
         </div>
         <div>
-          <label>show dollar amounts:</label>
-          <input
-            type="checkbox"
+          <Checkbox
             checked={viewType === 'price'}
             onChange={(e) => {
               if (e.currentTarget.checked) {
@@ -292,7 +370,10 @@ function App() {
               setViewType('gift')
             }}
           />
+          <label>&nbsp;show (rough) dollar amounts</label>
         </div>
+
+        <div className="tips">{renderTips()}</div>
         <button
           className="clear-superchats"
           onClick={() => {
@@ -300,14 +381,14 @@ function App() {
             window.location.reload()
           }}
         >
-          clear all superchats
+          clear all chats
         </button>
       </div>
       <div className="clear-superchats"></div>
     </div>
   )
 
-  function renderGiftAmount(sender) {
+  function renderGiftAmount(sender: any) {
     if (viewType === 'price') {
       return (
         <span className="money">
@@ -316,10 +397,35 @@ function App() {
       )
     }
     return (
-      <span className="money">
+      <span className={`money ${sender.gift}`}>
         <strong>{giftNames[sender.gift]}</strong>
       </span>
     )
+  }
+
+  function renderTips() {
+    return Object.keys(tips)
+      .map((v) => {
+        if (localStorage.getItem(`tip-${v}`)) return
+        return (
+          <div key={v} className="tip">
+            <div
+              onClick={() => {}}
+              className="x"
+              style={{
+                padding: 6,
+                borderRadius: '50%',
+                display: 'flex',
+                marginRight: 4,
+              }}
+            >
+              <IoMdInformationCircleOutline size={22} />
+            </div>
+            {tips[v]}
+          </div>
+        )
+      })
+      .filter(Boolean)
   }
 }
 
@@ -359,31 +465,30 @@ highest stack of chips and most of the high cards.`
 const mockSenders = [
   {
     displayname: 'Patrick',
-    avatar: 'https://i.imgur.com/dIX6QcT.png'
+    avatar: 'https://i.imgur.com/dIX6QcT.png',
   },
   {
     displayname: 'Spongebob',
-    avatar: 'https://i.imgur.com/0O3G4ek.png'
+    avatar: 'https://i.imgur.com/0O3G4ek.png',
   },
   {
     displayname: 'Mr.Krabs',
-    avatar: 'https://i.imgur.com/5qV11rs.png'
+    avatar: 'https://i.imgur.com/5qV11rs.png',
   },
   {
     displayname: 'Squidward',
-    avatar: 'https://i.imgur.com/wuaWw4Z.png'
+    avatar: 'https://i.imgur.com/wuaWw4Z.png',
   },
   { displayname: 'BoomerMan', avatar: 'https://i.imgur.com/vbNqpCk.png' },
   {
     displayname: 'Chocolate Man',
-    avatar: 'https://i.imgur.com/RtoUnZG.png'
+    avatar: 'https://i.imgur.com/RtoUnZG.png',
   },
   {
     displayname: 'anonymous',
-    avatar: null
-  }
+    avatar: null,
+  },
 ]
-
 
 function getGiftPrice(giftname: string, amount = 1) {
   return (prices[giftname] * +amount).toFixed(2)
@@ -398,24 +503,15 @@ const generateMockGift = () => {
   newGift.payload.data.streamMessageReceived[0].id = (
     Math.random() * 100000
   ).toFixed(0)
-  // newGift.payload.data.streamMessageReceived[0].sender.displayname = getRandomOf(
-  //   mockUsernames
-  // )
+
   const giftTypes = Object.keys(prices)
   newGift.payload.data.streamMessageReceived[0].gift = getRandomOf(giftTypes)
-  // newGift.payload.data.streamMessageReceived[0].amount = getRandomOf(
-  //   Array(5)
-  //     .fill('')
-  //     .map((x, i) => i + 1)
-  // )
-
-  // .avatar = getRandomOf(mockImages)
 
   newGift.payload.data.streamMessageReceived[0].sender = getRandomOf(
-    mockSenders
+    mockSenders,
   )
   newGift.payload.data.streamMessageReceived[0].message = getRandomOf(
-    mockMessages
+    mockMessages,
   )
 
   return newGift
@@ -436,7 +532,7 @@ const ex2payload = {
             avatar: 'https://image.dlivecdn.com/avatar/default21.png',
             partnerStatus: 'NONE',
             badges: [],
-            effect: null
+            effect: null,
           },
           role: 'None',
           roomRole: 'Member',
@@ -446,13 +542,13 @@ const ex2payload = {
           amount: '1',
           recentCount: 1,
           expireDuration: 0,
-          message: ''
-        }
-      ]
-    }
+          message: '',
+        },
+      ],
+    },
   },
   id: '10',
-  type: 'data'
+  type: 'data',
 }
 
 // const req = {
