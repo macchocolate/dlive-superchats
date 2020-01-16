@@ -193,6 +193,10 @@ function App() {
 
   return (
     <div>
+      <div style={{marginTop:80}}>
+        Hey king, there was a bug- its fixed for future shows, please use this imgur album tonight <a href="https://imgur.com/a/k2j02jc">superchat screencaps</a>
+
+      </div>
       <div className="superchat-container">
         {gifts.map((v) => {
           if (v.amount < amountFilter) return
