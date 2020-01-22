@@ -1,11 +1,34 @@
 import webpack = require('webpack')
 import HtmlWebpackPlugin = require('html-webpack-plugin')
+import chalk from 'chalk'
+let env: any = {}
+try {
+  env = require('dotenv-safe').config()
+} catch (e) {
+  if (process.env.NODE_ENV === 'production') {
+    console.error(chalk.red(e))
+    process.exit(1)
+  }
+  console.warn(chalk.yellow(e.message))
+}
+
+const envStrings = Object.assign(
+  {},
+  ...Object.keys(env).map((key) => ({
+    ['process.env.' + key]: JSON.stringify(env[key]),
+  })),
+)
 
 const config: webpack.Configuration = {
   mode: 'development',
   entry: './src',
 
-  plugins: [new HtmlWebpackPlugin({ template: './src/index.html' })],
+  plugins: [
+    new HtmlWebpackPlugin({ template: './src/index.html' }),
+    new webpack.DefinePlugin({
+      ...envStrings,
+    }),
+  ],
 
   module: {
     rules: [
@@ -19,10 +42,10 @@ const config: webpack.Configuration = {
               [
                 'babel-plugin-styled-components',
                 {
-                  ssr: false
-                }
+                  ssr: false,
+                },
               ],
-              '@babel/plugin-proposal-class-properties'
+              '@babel/plugin-proposal-class-properties',
             ],
             presets: [
               '@babel/preset-typescript',
@@ -31,21 +54,21 @@ const config: webpack.Configuration = {
                 '@babel/preset-env',
                 {
                   targets: {
-                    chrome: 80
-                  }
-                }
-              ]
-            ]
-          }
-        }
+                    chrome: 80,
+                  },
+                },
+              ],
+            ],
+          },
+        },
       },
       {
         test: /\.(vert|frag)$/,
-        use: 'raw-loader'
+        use: 'raw-loader',
       },
       {
         test: /\.(png|svg)$/,
-        use: 'url-loader'
+        use: 'url-loader',
       },
       {
         test: /\.s[ac]ss$/i,
@@ -55,21 +78,21 @@ const config: webpack.Configuration = {
           // Translates CSS into CommonJS
           'css-loader',
           // Compiles Sass to CSS
-          'sass-loader'
-        ]
-      }
-    ]
+          'sass-loader',
+        ],
+      },
+    ],
   },
 
   resolve: {
-    extensions: ['.js', '.tsx', '.ts', '.jsx', '*', '.scss']
+    extensions: ['.js', '.tsx', '.ts', '.jsx', '*', '.scss'],
   },
 
   devServer: {
     // open: true,
     host: '0.0.0.0',
-    port: 4141
-  }
+    port: 4141,
+  },
 }
 
 export default config

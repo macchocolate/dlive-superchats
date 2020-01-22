@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios'
 
-const CORS_PROXY = 'https://polished-meadow-3c4e.foobar.workers.dev/?'
-const CORS_PROXY2 = 'https://safe-fortress-20275.herokuapp.com/'
+const CORS_PROXY = process.env.CORS_PROXY
+const CORS_PROXY2 = process.env.CORS_PROXY2
 
 const debug = console.log
 
