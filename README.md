@@ -5,6 +5,10 @@
 
 </div>
 
+### Motivation
+
+On Dlive, creators can't view a log of all donations during a stream since they'll expire after a certain time. This app tracks superchats for the entirety you have your browser tab open.
+
 ### Developmentment
 
 Install dependencies
@@ -26,7 +30,3 @@ Build for production
 ```sh
 yarn build
 ```
-
-### Motivation
-
-On Dlive, creators can't view a log of all donations during a stream since they'll expire after a certain time. This app tracks superchats for the entirety you have your browser tab open.
