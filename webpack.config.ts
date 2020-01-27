@@ -3,7 +3,7 @@ import HtmlWebpackPlugin = require('html-webpack-plugin')
 import chalk from 'chalk'
 let env: any = {}
 try {
-  env = require('dotenv-safe').config()
+  env = require('dotenv-safe').config().parsed
 } catch (e) {
   if (process.env.NODE_ENV === 'production') {
     console.error(chalk.red(e))
@@ -19,8 +19,10 @@ const envStrings = Object.assign(
   })),
 )
 
+console.log({ envStrings })
+
 const config: webpack.Configuration = {
-  mode: 'development',
+  mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   entry: './src',
 
   plugins: [
@@ -46,6 +48,7 @@ const config: webpack.Configuration = {
                 },
               ],
               '@babel/plugin-proposal-class-properties',
+              '@babel/plugin-proposal-optional-chaining',
             ],
             presets: [
               '@babel/preset-typescript',

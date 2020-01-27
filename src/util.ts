@@ -1,13 +1,20 @@
-import axios, { AxiosError } from 'axios'
+import axios, { AxiosError, AxiosRequestConfig } from 'axios'
+import _ from 'lodash'
 
 const CORS_PROXY = process.env.CORS_PROXY
 const CORS_PROXY2 = process.env.CORS_PROXY2
 
 const debug = console.log
 
-export async function getWithCors(url: string) {
+export async function reqWithCors(options: AxiosRequestConfig) {
+  const opts = _.defaults(options, {
+    method: 'GET',
+  })
   const getRes = (tryNum = 0) => {
-    return axios.get(`${tryNum === 0 ? CORS_PROXY : CORS_PROXY2}${url}`)
+    return axios.request({
+      ...opts,
+      url: `${tryNum === 0 ? CORS_PROXY : CORS_PROXY2}${opts.url}`,
+    })
   }
 
   let ret
@@ -40,4 +47,9 @@ function getAppError(mes: string) {
   e.name = 'AppError'
 
   return e
+}
+
+export function prettyNumber(num: number) {
+  if (num > 999) return (num / 1000).toFixed(1) + 'k'
+  return num
 }

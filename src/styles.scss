@@ -1,12 +1,28 @@
 $blue: rgb(17, 82, 147);
 
+@mixin animate($duration: 0.2s, $easing: ease-in-out) {
+  -webkit-transition: all $duration $easing;
+  -moz-transition: all $duration $easing;
+  -o-transition: all $duration $easing;
+  transition: all $duration $easing;
+}
+
 html {
   scroll-behavior: smooth;
+  @extend .fancy-scrollbar;
+}
+
+.superchat-container-wrapper {
+  height: 100vh;
+  min-width: 600px;
+  width: 600px;
+  overflow-y: auto;
+  @extend .fancy-scrollbar;
 }
 
 .superchat-container {
   color: #202020;
-  margin: 0 20px;
+  margin: 0 10px;
   max-width: 600px;
   margin-top: 50px;
   display: flex;
@@ -16,27 +32,96 @@ html {
   padding: 10px 0;
 }
 
+kbd {
+  background-color: rgb(97, 97, 97);
+  border-radius: 3px;
+  padding: 4px;
+  font-size: 0.8em;
+  box-shadow: 0 2px 0 0px rgb(26, 26, 26);
+  vertical-align: text-bottom;
+}
+
+.anim {
+  transition: all 200ms;
+}
+
 a {
-  color: rgb(126, 169, 250);
-  text-decoration: none;
+  color: #93b8ff;
+  text-decoration: underline;
 }
 #app {
   width: 100%;
+
+  .MuiPaper-root {
+    background-color: #333;
+  }
 }
 
-.tips {
+.strong {
+  font-weight: bold;
+}
+.grid {
   display: flex;
-  flex-direction: column;
-  .tip {
-    width: 400px;
-    line-height: 1.4;
-    margin-bottom: 10px;
-    background-color: rgb(70, 70, 70);
-    padding: 6px 10px;
-    border-radius: 4px;
-    display: flex;
+
+  &.center {
     align-items: center;
+    justify-content: center;
   }
+  &.pad {
+    padding: 6px;
+  }
+
+  &.col {
+    flex-direction: column;
+  }
+
+  &.margin {
+    > div {
+      margin-right: 8px;
+    }
+  }
+}
+
+.animate-slide {
+  transition: right 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  // ,background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
+}
+
+.fs-12 {
+  font-size: 12px;
+}
+
+.avatar-img {
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+
+  &.large {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+// .tips {
+//   display: flex;
+//   flex-direction: column;
+// }
+
+blip {
+}
+
+.tip {
+  cursor: pointer;
+  // width: 400px;
+  line-height: 1.4;
+  margin-bottom: 10px;
+  background-color: rgb(70, 70, 70);
+  padding: 6px 10px;
+  border-radius: 4px;
+  // border-radius: 4px;
+  display: flex;
+  align-items: center;
+  // justify-content: space-between;
 }
 
 .sender-avatar {
@@ -44,7 +129,7 @@ a {
 }
 
 .fade-appear {
-  transition: opacity 500ms;
+  transition: all 400ms;
   opacity: 0;
 }
 
@@ -58,6 +143,49 @@ a {
   display: flex;
   align-items: baseline;
   // flex-direction: column;
+}
+
+.icon-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  // background-color: rgb(70, 70, 70);
+  // background-color: #555;
+  // cursor: pointer;
+  padding: 9px;
+  font-size: 18px;
+  background-color: #333;
+  // font-size: 24px;
+  transition: all 100ms;
+
+  &.btn {
+    cursor: pointer;
+    &:hover {
+      background-color: #ffffff17;
+    }
+  }
+
+  &.light {
+    background-color: transparent;
+    // background-color: #cccccc;
+    // color: #202020;
+    color: #e4e4e4;
+
+    &:hover {
+      // background-color: #cccccc;
+      // color: #202020;
+      background-color: #ffffff1c;
+    }
+  }
+  &.fs-30 {
+    font-size: 24px;
+    padding: 6px;
+  }
+
+  &.clear {
+    background-color: unset;
+  }
 }
 
 .superchat {
@@ -85,12 +213,11 @@ a {
   box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2),
     0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
   outline: none;
-  transition: box-shadow 100ms;
+  transition: box-shadow 100ms, opacity 500ms;
   &:focus {
-    box-shadow: 0px 0px 0px 3px rgba(255, 255, 255, 0.753);
-    // 0px 0px 5px 0px rgba(255, 255, 255, 0.63),
-    // 0px 0px 3px 0px rgba(255, 255, 255, 0.623);
-    // border: 6px solid white;
+    // unfortunately, setting transform or changing CSSOM will cause scroll container to not be sticky at location
+    // transform: translateX(15px);
+    box-shadow: 0px 0px 0px 3px rgb(255, 255, 255);
   }
   .header {
     display: flex;
@@ -121,6 +248,15 @@ a {
   // }
 }
 
+.close-btn {
+  // justify-self: flex-end;
+  display: flex;
+  align-items: center;
+  background-color: unset;
+  margin-left: auto;
+  font-size: 18px;
+}
+
 .chest {
   display: flex;
   align-items: center;
@@ -147,7 +283,7 @@ a {
     box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
       0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
     opacity: 0;
-    transition: all 200ms;
+    transition: all 500ms;
     // height: 0;
     &:focus {
       opacity: 1;
@@ -163,6 +299,10 @@ a {
 // .fade-up-enter {
 //   opacity: 1;
 // }
+
+.panel {
+  background-color: #333;
+}
 
 .error-container {
   position: fixed;
@@ -201,6 +341,13 @@ a {
     }
   }
 }
+.icon-text {
+  display: flex;
+  align-items: center;
+  > span {
+    margin-left: 10px;
+  }
+}
 
 button {
   color: rgba(0, 0, 0, 0.87);
@@ -229,33 +376,54 @@ button {
   box-sizing: border-box;
 }
 
+.right {
+  margin-left: auto;
+}
+.left {
+  margin-right: auto;
+}
+
 .fixed-header {
-  left: 660px;
+  @extend .fancy-scrollbar;
+  max-width: 320px;
+  width: 100%;
+  // left: 660px;
+  // right: 10px;
+
+  // width: 100%;
   flex-direction: column;
 
-  background: rgb(49, 49, 49);
+  // background: rgb(49, 49, 49);
+  // background-color: #3d3d3d;
+  border-radius: 4px;
 
   // left: 650px;
   // background: #f9f9f9;
   font-size: 14px;
-  position: fixed;
-  top: 10px;
-  min-width: max-content;
+  max-height: 100vh;
+  // position: fixed;
+  // top: 10px;
+  // bottom: 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  // min-width: max-content;
   // width:100%;
   // left: 0;
   // align-items: flex-end;
+  // position: relative;
   justify-content: center;
   // align-items: center;
-  padding: 10px;
+  // padding: 10px;
 
   // height: 0;
   // font-weight: bold;
   // width: 100%;
-  display: flex;
+  // display: flex;
   // overflow: scroll;
   // overflow: visible;
   // top: 10px;
   // left: 10px;
+  // padding-top: 100px;
 
   .price-filter {
     margin-left: 4px;
@@ -270,10 +438,10 @@ button {
 
   > div,
   > button {
-    display: flex;
-    align-items: center;
-    margin: 0 10px;
-    margin-top: 5px;
+    // display: flex;
+    // align-items: center;
+    // margin: 0 10px;
+    margin-top: 10px;
   }
 
   .MuiCheckbox-root {
@@ -291,15 +459,18 @@ button {
     }
   }
   .clear-superchats {
+    background-color: rgb(125, 21, 36);
     align-self: flex-end;
     max-width: max-content;
+    line-height: 2;
     margin-top: 60px;
     color: #fff;
-    background-color: $blue;
+    // background-color: $blue;
     // background-color: rgb(220, 0, 78);
     // background-color: salmon;
-    padding: 8px 6px;
+    padding: 6px 6px;
 
+    font-size: 12px;
     color: white;
     border: none;
     border-radius: 4px;
@@ -320,6 +491,7 @@ button {
   margin: 2px;
 }
 body {
+  // background-color: #eeeeee;
   background-color: #272727;
   color: #e2e2e2;
   // color: #202020;
@@ -329,5 +501,126 @@ body {
   margin: 0px;
   display: flex;
   justify-content: center;
-  padding-bottom: 10px;
+  // padding-bottom: 10px;
+}
+
+$scrollBG: rgb(73, 73, 73);
+$thumbBG: rgb(10, 10, 10);
+
+.fancy-scrollbar {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: $thumbBG $scrollBG;
+  &::-webkit-scrollbar-track {
+    background: $scrollBG;
+  }
+  &::-webkit-scrollbar-thumb {
+    // background-color: $thumbBG;
+    background-color: #232323;
+
+    // border-radius: 6px;
+    // border: 3px solid $scrollBG;
+  }
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+  // &::-webkit-scrollbar-track {
+  //   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  //   border-radius: 10px;
+  //   background-color: #f5f5f5;
+  // }
+
+  // &::-webkit-scrollbar {
+  //   width: 12px;
+  //   background-color: #f5f5f5;
+  // }
+
+  // &::-webkit-scrollbar-thumb {
+  //   border-radius: 10px;
+  //   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  //   background-color: #555;
+  // }
+}
+
+html {
+  --scrollbarBG: #cfd8dc;
+  --thumbBG: #90a4ae;
+}
+body::-webkit-scrollbar {
+  width: 11px;
+}
+body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--thumbBG) var(--scrollbarBG);
+}
+body::-webkit-scrollbar-track {
+  background: var(--scrollbarBG);
+}
+body::-webkit-scrollbar-thumb {
+  background-color: var(--thumbBG);
+  border-radius: 6px;
+  border: 3px solid var(--scrollbarBG);
+}
+
+.status.on::before {
+  background: #1ac97f;
+  box-shadow: rgba(21, 189, 118, 0.4) 0px 0px 0px;
+  // animation: 2s ease 0s infinite normal none running pulse;
+}
+
+.status.on.pulse::before {
+  animation: 2s ease 0s infinite normal none running pulse;
+}
+.status::before {
+  box-sizing: border-box;
+  content: '';
+  display: block;
+  // margin-right: 14px;
+  width: 10px;
+  height: 10px;
+  /* cursor: pointer; */
+  box-shadow: rgba(94, 94, 94, 0.4) 0px 0px 0px;
+  border-radius: 50%;
+  background: rgb(143, 166, 178);
+
+  /* border: 2px solid rgb(66, 66, 66); */
+}
+
+.status {
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.status.on {
+  color: rgb(0, 165, 95);
+}
+
+.status.off {
+  color: rgb(143, 166, 178);
+}
+
+// .pulse {
+//   animation: 2s ease 0s infinite normal none running pulse;
+// }
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(21, 189, 118, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(21, 189, 118, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(21, 189, 118, 0);
+  }
+}
+
+.line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1.5px;
 }
