@@ -1,6 +1,6 @@
 <div align="center">
     <img src="media/banner.png">
-    <h3><a href="https://zoomercode.github.io/dlive-superchats/#demo">zoomercode.github.io/dlive-superchats</a></h3>
+    <h3><a href="https://zoomerdev.github.io/dlive-superchats/#demo">zoomerdev.github.io/dlive-superchats</a></h3>
     <p>Track your Dlive Superchats</p>
 
 </div>
