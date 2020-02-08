@@ -1,11 +1,22 @@
-import webpack = require('webpack')
-import HtmlWebpackPlugin = require('html-webpack-plugin')
+import AddAssetHtmlPlugin from 'add-asset-html-webpack-plugin'
 import chalk from 'chalk'
+import fs from 'fs'
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import path from 'path'
+import webpack from 'webpack'
+
+const isProduction = process.env.NODE_ENV === 'production'
+
+const currentDir = process.cwd()
+const resolvePath = (relativePath: string) =>
+  path.resolve(currentDir, relativePath)
+
 let env: any = {}
+
 try {
   env = require('dotenv-safe').config().parsed
 } catch (e) {
-  if (process.env.NODE_ENV === 'production') {
+  if (isProduction) {
     console.error(chalk.red(e))
     process.exit(1)
   }
@@ -22,15 +33,66 @@ const envStrings = Object.assign(
 console.log({ envStrings })
 
 const config: webpack.Configuration = {
-  mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
+  mode: isProduction ? 'production' : 'development',
   entry: './src',
+  target: 'web',
 
-  plugins: [
-    new HtmlWebpackPlugin({ template: './src/index.html' }),
-    new webpack.DefinePlugin({
-      ...envStrings,
-    }),
-  ],
+  plugins: isProduction
+    ? [
+        new webpack.DefinePlugin({
+          ...envStrings,
+        }),
+        new HtmlWebpackPlugin({
+          chunksSortMode: 'auto',
+          filename: 'index.html',
+          inject: true,
+          minify: {
+            collapseWhitespace: true,
+            keepClosingSlash: true,
+            minifyCSS: true,
+            minifyJS: true,
+            minifyURLs: true,
+            removeComments: true,
+            removeEmptyAttributes: true,
+            removeRedundantAttributes: true,
+            removeStyleLinkTypeAttributes: true,
+            useShortDoctype: true,
+          },
+          template: './src/index.html',
+          title: 'Dlive Superchats',
+        }),
+      ]
+    : [
+        new webpack.DefinePlugin({
+          ...envStrings,
+        }),
+        new webpack.DllReferencePlugin({
+          context: __dirname,
+          manifest: resolvePath('dll/vendors-manifest.json'),
+        }),
+        new HtmlWebpackPlugin({
+          chunksSortMode: 'auto',
+          filename: 'index.html',
+          inject: true,
+          minify: {
+            collapseWhitespace: true,
+            keepClosingSlash: true,
+            minifyCSS: true,
+            minifyJS: true,
+            minifyURLs: true,
+            removeComments: true,
+            removeEmptyAttributes: true,
+            removeRedundantAttributes: true,
+            removeStyleLinkTypeAttributes: true,
+            useShortDoctype: true,
+          },
+          template: './src/index.html',
+          title: 'Dlive Superchats',
+        }),
+        new AddAssetHtmlPlugin({
+          filepath: resolvePath('dll/vendors.dll.js'),
+        }),
+      ],
 
   module: {
     rules: [
@@ -39,30 +101,6 @@ const config: webpack.Configuration = {
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
-          options: {
-            plugins: [
-              [
-                'babel-plugin-styled-components',
-                {
-                  ssr: false,
-                },
-              ],
-              '@babel/plugin-proposal-class-properties',
-              '@babel/plugin-proposal-optional-chaining',
-            ],
-            presets: [
-              '@babel/preset-typescript',
-              '@babel/preset-react',
-              [
-                '@babel/preset-env',
-                {
-                  targets: {
-                    chrome: 80,
-                  },
-                },
-              ],
-            ],
-          },
         },
       },
       {
@@ -90,12 +128,14 @@ const config: webpack.Configuration = {
   resolve: {
     extensions: ['.js', '.tsx', '.ts', '.jsx', '*', '.scss'],
   },
+}
 
-  devServer: {
+if (!isProduction) {
+  config.devServer = {
     // open: true,
     host: '0.0.0.0',
     port: 4141,
-  },
+  }
 }
 
 export default config
