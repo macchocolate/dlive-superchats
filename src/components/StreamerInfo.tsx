@@ -7,6 +7,7 @@ import Skeleton from '@material-ui/lab/Skeleton'
 type Props = {
   streamerInfo: typeof userByDisplayName.data.userByDisplayName | null
   displayName: string
+  avatarOnly: boolean
 }
 export default function(props: Props) {
   // <div className="grid strong center">{props.displayName}</div>
@@ -28,15 +29,17 @@ export default function(props: Props) {
       <div>
         <img className="avatar-img large" src={props.streamerInfo.avatar} />
       </div>
-      <div className="grid col">
-        <div className="strong">
-          {props.streamerInfo.displayname}
-          {/* <span className="streamer-check">
+      {!props.avatarOnly && (
+        <div className="grid col">
+          <div className="strong">
+            {props.streamerInfo.displayname}
+            {/* <span className="streamer-check">
             <IoMdCheckmarkCircle />
           </span> */}
+          </div>
+          {renderLivestreamInfo()}
         </div>
-        {renderLivestreamInfo()}
-      </div>
+      )}
     </div>
   )
 

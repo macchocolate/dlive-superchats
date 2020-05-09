@@ -34,7 +34,7 @@ export default function(props: Props) {
   useEffect(() => {
     localStorage.setItem(
       'notifications',
-      JSON.stringify(_.mapValues(props.notifications, (val) => val.unread)),
+      JSON.stringify(_.mapValues(props.notifications, (val) => val.read)),
     )
   }, [props.notifications])
 
@@ -74,7 +74,7 @@ export default function(props: Props) {
                 ...prev,
                 [key]: {
                   message: notifications[key].message,
-                  unread: !notifications[key].unread,
+                  read: !notifications[key].read,
                 },
               }))
             }}
@@ -94,7 +94,7 @@ export default function(props: Props) {
             <div>{val.message}</div>
             <div className="icon-circle clear right">
               <div
-                className={`status ${notifications[key].unread ? 'on' : 'off'}`}
+                className={`status ${!notifications[key].read ? 'on' : 'off'}`}
                 // className={`status`}
               ></div>
             </div>

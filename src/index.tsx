@@ -15,6 +15,8 @@ import {
   IoMdNotificationsOutline,
   IoMdSettings,
   IoMdTrash,
+  IoMdClose,
+  IoMdCheckmarkCircle,
 } from 'react-icons/io'
 import { CSSTransition } from 'react-transition-group'
 import { BarChart } from './components/Charts'
@@ -27,7 +29,20 @@ import { generateMockGift, generateMockMessage } from './mocks'
 import './styles'
 import { reqWithCors } from './util'
 import { WebSocketRetry } from './WebsocketRetry'
+import Axios from 'axios'
 // import Debug from 'debug'
+
+let accountsOfNobility = {} as any
+
+async function getAccountsOfNobility() {
+  const res = await Axios.get(
+    'https://gist.githubusercontent.com/zoomerdev/8d3175fca22f78aa2a59a9e52fd21876/raw',
+  )
+  accountsOfNobility = res.data
+  debug({ accountsOfNobility })
+}
+
+getAccountsOfNobility().catch()
 
 const console = window.console
 const debug = window.localStorage.debug ? console.log : function() {}
@@ -53,6 +68,12 @@ document.addEventListener('keydown', (e) => {
 })
 
 const tips = {
+  'fake-accounts': (
+    <span>
+      Certain accounts will now be flagged as 'fake' if they are determined to
+      be imposter accounts
+    </span>
+  ),
   'use-zoom': (
     <span>
       Zoom in with <kbd>ctrl</kbd> <kbd>+</kbd>
@@ -109,10 +130,11 @@ function App() {
   const [notifications, setNotifications] = useState(() => {
     const readTips = JSON.parse(localStorage.getItem('notifications') || '{}')
 
+    debug({ readTips })
     return _.mapValues(tips, (val, key) => {
       return {
         message: val,
-        unread: !readTips[key],
+        read: readTips[key],
       }
     })
   })
@@ -126,6 +148,9 @@ function App() {
   const [streamerInfo, setStreamerInfo] = useState<
     typeof userByDisplayName.data.userByDisplayName | null
   >()
+
+  const islg = useMediaQuery(theme.breakpoints.up('md'))
+  const [menuOpen, setMenuOpen] = useState<null | boolean>(null)
   function storageLocation() {
     return `${displayName}-gifts`
   }
@@ -165,7 +190,14 @@ function App() {
     if (giftData.gift === 'LEMON' || giftData.gift === 'ICE_CREAM') {
       return
     }
-    const sender = giftData.sender.displayname
+
+    const sender = {
+      displayname: giftData.sender.displayname as string,
+      problematic: accountsOfNobility[giftData.sender.displayname],
+      verified:
+        giftData.sender.partnerStatus &&
+        giftData.sender.partnerStatus !== 'NONE',
+    }
     const createdAt = giftData.createdAt.slice(0, -6)
     const amount = getGiftPrice(giftData.gift, giftData.amount)
     const avatar = giftData.sender.avatar || null
@@ -178,7 +210,7 @@ function App() {
           avatar: avatar && '' + avatar,
           createdAt,
           id: '' + giftData.id,
-          sender: '' + sender,
+          sender,
           gift: giftData.gift,
           amount,
           message: '' + giftData.message,
@@ -207,142 +239,11 @@ function App() {
       })
   }, [])
 
-  const notificationsHasUnread = _.some(notifications, (val) => val.unread)
+  const notificationsHasUnread = _.some(notifications, (val) => !val.read)
   return (
     <ThemeProvider theme={theme}>
       <div style={{ display: 'flex' }}>
-        {useMediaQuery(theme.breakpoints.up('lg')) && (
-          <div className="fixed-header" style={{ position: 'relative' }}>
-            <div
-              style={{
-                position: 'relative',
-              }}
-            >
-              <Settings
-                setSettings={setSettings}
-                settings={settings}
-                isOpen={views['settings']}
-                onClose={() =>
-                  setViews((prev) => ({ ...prev, settings: false }))
-                }
-              />
-              <Tips
-                isOpen={views['notifications']}
-                notifications={notifications}
-                setNotifications={setNotifications}
-                onClose={() =>
-                  setViews((prev) => ({ ...prev, notifications: false }))
-                }
-              />
-            </div>
-
-            <div style={{ padding: 10 }}>
-              <div className="grid center" style={{ marginBottom: 10 }}>
-                <StreamerInfo
-                  streamerInfo={streamerInfo}
-                  displayName={displayName}
-                />
-                <div className="grid margin right">
-                  <div className="grid" style={{ position: 'relative' }}>
-                    <div
-                      style={{
-                        position: 'absolute',
-                        right: 0,
-                        top: 0,
-                        margin: 6,
-                        display: notificationsHasUnread ? 'unset' : 'none',
-                      }}
-                      className={`status on pulse`}
-                      // className={`status`}
-                    ></div>
-                    <div
-                      className="icon-circle btn light fs-30"
-                      onClick={() => {
-                        setViews((prev) => ({ ...prev, notifications: true }))
-                      }}
-                    >
-                      {notificationsHasUnread ? (
-                        <IoMdNotifications />
-                      ) : (
-                        <IoMdNotificationsOutline />
-                      )}
-                    </div>
-                  </div>
-                  <div className="grid">
-                    <div
-                      className="icon-circle btn light fs-30"
-                      onClick={() => {
-                        setViews((prev) => ({ ...prev, settings: true }))
-                      }}
-                    >
-                      <IoMdSettings />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div style={{ flexDirection: 'initial' }}>
-                {/* <ExpansionPanel defaultExpanded={true}>
-                  <ExpansionPanelSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1a-content"
-                    id="panel1a-header"
-                  >
-                    <Typography>Settings</Typography>
-                  </ExpansionPanelSummary>
-                </ExpansionPanel>
-              </div>
-
-              <div style={{ flexDirection: 'column' }}>
-                <ExpansionPanel>
-                  <ExpansionPanelSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1a-content"
-                    id="panel1a-header"
-                  >
-                    <Typography>Tips</Typography>
-                  </ExpansionPanelSummary>
-                  <ExpansionPanelDetails>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    </div>
-                  </ExpansionPanelDetails>
-                </ExpansionPanel> */}
-              </div>
-
-              <div className="icon-text">
-                <div
-                  className="icon-circle btn"
-                  onClick={() => {
-                    // @ts-ignore
-                    document.querySelector('.superchat:first-child').focus()
-                  }}
-                >
-                  <IoIosArrowDown />
-                </div>
-                <span>Focus oldest chat</span>
-              </div>
-              <button
-                className="clear-superchats"
-                onClick={() => {
-                  window.localStorage.removeItem(storageLocation())
-                  setGifts([])
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      margin: '0 4px',
-                    }}
-                  >
-                    <IoMdTrash />
-                  </div>
-                  <div>Clear all chats</div>
-                </div>
-              </button>
-            </div>
-          </div>
-        )}
+        {renderMenu()}
         <div className="superchat-container-wrapper">
           <div className="superchat-container">
             {gifts.map((v: any) => {
@@ -387,7 +288,15 @@ function App() {
                         )}
                       </div>
                       <div className="sender-info">
-                        <strong>{v.sender}</strong>
+                        {v.sender.problematic === false && (
+                          <span
+                            style={{ color: '#ff3535', fontWeight: 'bold' }}
+                          >
+                            fake
+                          </span>
+                        )}
+                        {Boolean(v.sender.verified) && <IoMdCheckmarkCircle />}
+                        <strong>{v.sender.displayname}</strong>
                         {renderGiftAmount(v)}
                         <span className="datetime">
                           {day(+v.createdAt).format('hh:mma')}
@@ -413,10 +322,7 @@ function App() {
         </div>
         <div
           style={{
-            display: 'flex',
-            // marginTop: 10,
             paddingLeft: 10,
-            flexWrap: 'wrap',
           }}
         >
           <div style={{ width: 300, margin: 10 }}>
@@ -492,6 +398,154 @@ function App() {
       </div>
     </ThemeProvider>
   )
+
+  function renderMenu() {
+    if (menuOpen != null ? menuOpen : islg) {
+      return (
+        <div className="fixed-header" style={{ position: 'relative' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              height: 5,
+            }}
+          >
+            <div
+              style={{
+                padding: 5,
+                cursor: 'pointer',
+              }}
+              onClick={() => {
+                setMenuOpen(false)
+              }}
+            >
+              <IoMdClose />
+            </div>
+            <div
+              style={{
+                position: 'relative',
+              }}
+            ></div>
+            <Settings
+              setSettings={setSettings}
+              settings={settings}
+              isOpen={views['settings']}
+              onClose={() => setViews((prev) => ({ ...prev, settings: false }))}
+            />
+            <Tips
+              isOpen={views['notifications']}
+              notifications={notifications}
+              setNotifications={setNotifications}
+              onClose={() =>
+                setViews((prev) => ({ ...prev, notifications: false }))
+              }
+            />
+          </div>
+
+          <div style={{ padding: 10 }}>
+            <div className="grid center" style={{ marginBottom: 10 }}>
+              <StreamerInfo
+                streamerInfo={streamerInfo}
+                displayName={displayName}
+              />
+              <div className="grid margin right">
+                <div className="grid" style={{ position: 'relative' }}>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: 0,
+                      margin: 6,
+                      display: notificationsHasUnread ? 'unset' : 'none',
+                    }}
+                    className={`status on pulse`}
+                    // className={`status`}
+                  ></div>
+                  <div
+                    className="icon-circle btn light fs-30"
+                    onClick={() => {
+                      setViews((prev) => ({ ...prev, notifications: true }))
+                    }}
+                  >
+                    {notificationsHasUnread ? (
+                      <IoMdNotifications />
+                    ) : (
+                      <IoMdNotificationsOutline />
+                    )}
+                  </div>
+                </div>
+                <div className="grid">
+                  <div
+                    className="icon-circle btn light fs-30"
+                    onClick={() => {
+                      setViews((prev) => ({ ...prev, settings: true }))
+                    }}
+                  >
+                    <IoMdSettings />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style={{ flexDirection: 'initial' }}></div>
+
+            <div className="icon-text">
+              <div
+                className="icon-circle btn"
+                onClick={() => {
+                  // @ts-ignore
+                  document.querySelector('.superchat:first-child').focus()
+                }}
+              >
+                <IoIosArrowDown />
+              </div>
+              <span>Focus oldest chat</span>
+            </div>
+            <button
+              className="clear-superchats"
+              onClick={() => {
+                window.localStorage.removeItem(storageLocation())
+                setGifts([])
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    margin: '0 4px',
+                  }}
+                >
+                  <IoMdTrash />
+                </div>
+                <div>Clear all chats</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      )
+    }
+    return (
+      <div>
+        <div
+          className="grid center"
+          style={{
+            marginTop: 10,
+            marginLeft: 10,
+            cursor: 'pointer',
+          }}
+          onClick={() => {
+            setMenuOpen(true)
+          }}
+        >
+          <StreamerInfo
+            streamerInfo={streamerInfo}
+            displayName={displayName}
+            avatarOnly={true}
+          />
+        </div>
+      </div>
+    )
+  }
 
   function renderGiftAmount(sender: any) {
     if (settings.showDollarAmounts) {
@@ -688,4 +742,8 @@ async function openWs(displayName: string, onGift: Function) {
 
 function getGiftPrice(giftname: string, amount = 1) {
   return (prices[giftname] * LEMON_PRICE * +amount).toFixed(2)
+}
+
+function switchOnMedia(obj) {
+  return useMediaQuery(theme.breakpoints.up('lg')) ? obj['lg'] : obj['sm']
 }

@@ -35,10 +35,12 @@ const mockSenders = [
   {
     displayname: 'Patrick',
     avatar: 'https://i.imgur.com/dIX6QcT.png',
+    partnerStatus: 'VERIFIED',
   },
   {
     displayname: 'Spongebob',
     avatar: 'https://i.imgur.com/0O3G4ek.png',
+    partnerStatus: 'NONE',
   },
   {
     displayname: 'Mr.Krabs',
